@@ -1,4 +1,4 @@
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{middleware::Logger, web, App, HttpServer};
 use dotenv::dotenv;
 use lazy_static::lazy_static;
 use sqlx::sqlite::SqlitePool;

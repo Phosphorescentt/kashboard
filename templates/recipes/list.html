@@ -1,0 +1,10 @@
+{% extends "main.html" %} {% block content %}
+
+<h2>Recipes!</h2>
+{% for recipe in recipes %}
+
+<h3>{{ recipe.name }}</h3>
+<h4>{{ recipe.time_minutes }}</h4>
+<h5>{{ recipe.instructions }}</h5>
+
+{% endfor %} {% endblock content %}
