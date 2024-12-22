@@ -1,0 +1,6 @@
+{% for datum in bin_data.data %} {% for service_header in datum.service_headers
+%}
+<h3>{{ service_header.task_type }}</h3>
+{{ service_header.next }}
+<hr />
+{% endfor %} {% endfor %}
