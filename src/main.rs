@@ -6,7 +6,7 @@ use std::env;
 use tera::Tera;
 
 pub mod calendar;
-pub mod recipes;
+pub mod meals;
 pub mod utilities;
 
 pub struct AppState {
@@ -41,7 +41,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(AppState { pool: pool.clone() }))
             .service(web::scope("/calendar").configure(calendar::init))
             .service(web::scope("/utilities").configure(utilities::init))
-            .service(web::scope("/recipes").configure(recipes::init))
+            .service(web::scope("/meals").configure(meals::init))
             .wrap(Logger::default())
     })
     .bind(("192.168.0.86", 8080))?

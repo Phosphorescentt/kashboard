@@ -1,0 +1,61 @@
+{% extends "main.html" %} {% block content %}
+
+<article ondrop="drop(event)" ondragover="allowDrop(event)">
+{% for recipe in recipes %}
+
+<div id="drag{{ recipe.id }}" style="display: inline-block;" draggable="true" ondragstart="drag(event)">
+    <article>
+      <h3>{{ recipe.name }}</h3>
+      <h6>{{ recipe.time_minutes }}m</h6>
+    </article>
+</div>
+{% endfor %} 
+</article>
+
+<hr>
+
+<div class="container">
+  <article id="monday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Monday</h3>
+  </article>
+  <article id="tuesday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Tuesday</h3>
+  </article>
+  <article id="wednesday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Wednesday</h3>
+  </article>
+  <article id="thursday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Thursday</h3>
+  </article>
+  <article id="friday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Friday</h3>
+  </article>
+  <article id="saturday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Saturday</h3>
+  </article>
+  <article id="sunday" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Sunday</h3>
+  </article>
+</div>
+
+<script>
+  function allowDrop(ev) {
+    ev.preventDefault();
+  }
+
+  function drag(ev) {
+    console.log(ev);
+    ev.dataTransfer.setData("text", ev.target.id);
+  }
+
+  function drop(ev) {
+    ev.preventDefault();
+    console.log(ev);
+    var data = ev.dataTransfer.getData("text");
+    console.log(data);
+    console.log(document.getElementById(data));
+    ev.target.appendChild(document.getElementById(data));
+  }
+</script>
+
+{% endblock content %}

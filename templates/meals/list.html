@@ -1,0 +1,10 @@
+<h2 class="grid">Meals</h2>
+{% for recipe in recipes %}
+
+<a href="meals/recipe/{{ recipe.id }}">
+  <article style="display: inline-block">
+    <h3>{{ recipe.name }}</h3>
+    <h6>{{ recipe.time_minutes }}m</h6>
+  </article>
+</a>
+{% endfor %} 

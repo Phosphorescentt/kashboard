@@ -3,10 +3,10 @@ use sqlx::FromRow;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Recipe {
-    id: i64,
-    name: String,
-    time_minutes: i64,
-    instructions: String,
+    pub id: i64,
+    pub name: String,
+    pub time_minutes: Option<i64>,
+    pub instructions: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
