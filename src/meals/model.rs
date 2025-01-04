@@ -10,9 +10,17 @@ pub struct Recipe {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Ingredients {
+pub struct Ingredient {
     id: u32,
     name: String,
+}
+
+#[derive(Serialize, Deserialize, FromRow)]
+pub struct IngredientWithCountUnit {
+    pub id: i64,
+    pub name: String,
+    pub count: i64,
+    pub unit: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -21,10 +29,4 @@ struct RecipeIngredientsAssociations {
     recipe_id: u32,
     ingredient_id: u32,
     count: u32,
-}
-
-struct RecipeDates {
-    id: u32,
-    recipe_id: u32,
-    date: chrono::DateTime<chrono::Utc>,
 }

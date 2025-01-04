@@ -1,13 +1,16 @@
 {% extends "main.html" %} {% block content %}
 
-<article class="recipe-holder" ondrop="drop(event)" ondragover="allowDrop(event)">
-  <h2>Recipes</h2>
+<article id="not-selected" class="recipe-holder" ondrop="drop(event)" ondragover="allowDrop(event)">
+<h2>Recipes</h2>
 {% for recipe in recipes %}
 
-<div id="recipe-{{ recipe.id }}" style="display: inline-block;" draggable="true" ondragstart="drag(event)">
+<div id="{{ recipe.id }}" class="recipe" style="display: inline-block;" draggable="true" ondragstart="drag(event)">
     <article>
       <h3>{{ recipe.name }}</h3>
       <h6>{{ recipe.time_minutes }}m</h6>
+      <a href="recipe/{{ recipe.id }}">
+        <button>View</button>
+      </a>
     </article>
 </div>
 {% endfor %} 
@@ -15,45 +18,66 @@
 
 <hr>
 
-<div class="container">
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+<div class="container days-containers">
+  <article id="monday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Monday</h3>
   </article>
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <article id="tuesday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Tuesday</h3>
   </article>
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <article id="wednesday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Wednesday</h3>
   </article>
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <article id="thursday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Thursday</h3>
   </article>
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <article id="friday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Friday</h3>
   </article>
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <article id="saturday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Saturday</h3>
   </article>
-  <article class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
+  <article id="sunday" class="recipe-holder" style="display: inline-block" ondrop="drop(event)" ondragover="allowDrop(event)">
     <h3>Sunday</h3>
   </article>
 </div>
 
+<hr>
+<button id="get_shopping_list_button" hx-post="/meals/create-shopping-list" hx-target="#shopping-list">Generate Shopping List!</button>
+<div id="shopping-list"></div>
+
 <script>
-  function allowDrop(ev) {
-    ev.preventDefault();
-  }
+function allowDrop(ev) {
+  ev.preventDefault();
+}
 
-  function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
-  }
+function drag(ev) {
+  ev.dataTransfer.setData("text", ev.target.id);
+}
 
-  function drop(ev) {
-    ev.preventDefault();
-    var data = ev.dataTransfer.getData("text");
-    parent = ev.target.closest(".recipe-holder")
-    parent.appendChild(document.getElementById(data));
+function drop(ev) {
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("text");
+  parent = ev.target.closest(".recipe-holder");
+  parent.appendChild(document.getElementById(data));
+}
+
+document.body.addEventListener("htmx:configRequest", function (evt) {
+  if (evt.detail.path == "/meals/create-shopping-list") {
+    recipes_collection = document.getElementsByClassName("recipe");
+    recipes = [].slice.call(recipes_collection)
+    selected_recipe_ids = [];
+    recipes.forEach(element => {
+      parent_recipe_holder = element.parentElement;
+      // Pick up only the recipes that have been moved from the not-selected box.
+      if (parent_recipe_holder.id != "not-selected") {
+        selected_recipe_ids.push(parseInt(element.id, 10))
+      }
+    })
+    evt.detail.parameters["recipe_ids"] = selected_recipe_ids.join(",");
+    console.log(evt.detail.parameters);
   }
+});
 </script>
 
 {% endblock content %}

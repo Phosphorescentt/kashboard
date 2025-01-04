@@ -1,0 +1,8 @@
+<hr />
+<h3>Ingredients</h3>
+{% for ingredient in ingredients %}
+<li>
+  {{ ingredient.name }} - {{ ingredient.count }}{% if ingredient.unit != "count"
+  %} {{ ingredient.unit }}{% endif %}
+</li>
+{% endfor %}

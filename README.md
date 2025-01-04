@@ -18,9 +18,9 @@
 
 ## TODO
 
-- [ ] Show planned meals page
-- [ ] Plan meals page
+- [x] List meals page
+- [x] View meal page
+- [x] Plan meals page
+- [ ] Shopping list page
 - [ ] Create meals page
-- [ ] List meals page
 - [ ] Edit meals page
-- [ ] View meal page

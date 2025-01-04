@@ -2,6 +2,10 @@
 
 <h2>{{ recipe.name }}</h3>
 <h3>{{ recipe.time_minutes }}</h4>
-<h4>{{ recipe.instructions }}</h5>
+<h4>{{ recipe.instructions }}</li>
+<h3>Ingredients</h3>
+{% for ingredient in ingredients %}
+<li>{{ ingredient.name }} - {{ ingredient.count }}{% if ingredient.unit != "count" %} {{ ingredient.unit }}{% endif %}</li>
+{% endfor %}
 
 {% endblock content %}

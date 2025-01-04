@@ -39,12 +39,12 @@ async fn main() -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(AppState { pool: pool.clone() }))
-            .service(web::scope("/calendar").configure(calendar::init))
-            .service(web::scope("/utilities").configure(utilities::init))
+            // .service(web::scope("/calendar").configure(calendar::init))
+            // .service(web::scope("/utilities").configure(utilities::init))
             .service(web::scope("/meals").configure(meals::init))
             .wrap(Logger::default())
     })
-    .bind(("192.168.0.86", 8080))?
+    // .bind(("192.168.0.86", 8080))?
     .bind(("127.0.0.1", 8080))?
     .run();
 
