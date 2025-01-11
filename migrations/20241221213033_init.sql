@@ -16,7 +16,7 @@ CREATE TABLE recipe_ingredients_associations (
     ingredient_id INTEGER NOT NULL,
     count INTEGER NOT NULL,
     unit VARCHAR(255) NOT NULL,
-    FOREIGN KEY (recipe_id) REFERENCES recipes(id),
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
     FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
     UNIQUE (recipe_id, ingredient_id, unit)
 );

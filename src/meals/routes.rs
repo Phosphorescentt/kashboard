@@ -1,4 +1,8 @@
-use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{
+    delete, get, post,
+    web::{self, Redirect},
+    HttpRequest, HttpResponse, Responder,
+};
 use log::info;
 use serde::Deserialize;
 use tera::Context;
@@ -11,6 +15,8 @@ use super::model;
 struct ShoppingListRequest {
     recipe_ids: String,
 }
+
+// Views
 
 #[get("")]
 async fn recipes_list(state: web::Data<AppState>) -> impl Responder {
@@ -65,6 +71,19 @@ async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Respon
     return HttpResponse::Ok().body(content);
 }
 
+#[post("/recipe/delete/{id}")]
+async fn recipe_delete(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
+    let id: u32 = req.match_info().get("id").unwrap().parse().unwrap();
+    let p = state.pool.clone();
+
+    let deleted = sqlx::query!(r#"DELETE FROM recipes WHERE id = ?"#, id)
+        .fetch_all(&p)
+        .await
+        .unwrap();
+
+    return Redirect::to("/meals");
+}
+
 #[get("/plan")]
 async fn plan(state: web::Data<AppState>) -> impl Responder {
     let p = state.pool.clone();
@@ -80,6 +99,8 @@ async fn plan(state: web::Data<AppState>) -> impl Responder {
     let content = TEMPLATES.render("meals/plan.html", &context).unwrap();
     return HttpResponse::Ok().body(content);
 }
+
+// COMPONENTS
 
 fn validate_ids_string(s: String) -> Option<Vec<i64>> {
     let parts = s.split(",");

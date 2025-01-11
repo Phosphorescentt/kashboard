@@ -1,6 +1,9 @@
 {% extends "main.html" %} {% block content %}
 
 <h2 class="grid">Meals</h2>
+<a href="/meals/plan"><button>Plan!</button></a>
+<hr>
+
 {% for recipe in recipes %}
 
 <a href="meals/recipe/{{ recipe.id }}">

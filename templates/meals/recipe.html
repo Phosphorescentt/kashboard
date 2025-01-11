@@ -1,11 +1,16 @@
 {% extends "main.html" %} {% block content %}
 
 <h2>{{ recipe.name }}</h3>
-<h3>{{ recipe.time_minutes }}</h4>
-<h4>{{ recipe.instructions }}</li>
-<h3>Ingredients</h3>
+<h3>{{ recipe.time_minutes }} minutes</h4>
+<h4>Instructions</h4>
+<p>{{ recipe.instructions }}</p>
+<h4>Ingredients</h4>
 {% for ingredient in ingredients %}
 <li>{{ ingredient.name }} - {{ ingredient.count }}{% if ingredient.unit != "count" %} {{ ingredient.unit }}{% endif %}</li>
 {% endfor %}
+
+<form action="/meals/recipe/delete/{{ recipe.id }}" method="post">
+<button class="pico-color-red-500">Delete</button>
+</form>
 
 {% endblock content %}
