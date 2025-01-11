@@ -41,7 +41,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(AppState { pool: pool.clone() }))
             // .service(web::scope("/calendar").configure(calendar::init))
             // .service(web::scope("/utilities").configure(utilities::init))
-            .service(web::scope("/meals").configure(meals::init))
+            .service(web::scope("/recipes").configure(meals::init))
             .wrap(Logger::default())
     })
     .bind(("127.0.0.1", 8080))?

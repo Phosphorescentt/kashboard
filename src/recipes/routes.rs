@@ -1,5 +1,5 @@
 use actix_web::{
-    delete, get, post,
+    get, post,
     web::{self, Redirect},
     HttpRequest, HttpResponse, Responder,
 };
@@ -33,7 +33,7 @@ async fn recipes_list(state: web::Data<AppState>) -> impl Responder {
     return HttpResponse::Ok().body(content);
 }
 
-#[get("/recipe/{id}")]
+#[get("/recipe/{id}/")]
 async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
     let id: u32 = req.match_info().get("id").unwrap().parse().unwrap();
     let p = state.pool.clone();
@@ -48,7 +48,7 @@ async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Respon
         r#"
             SELECT i.id as id,
                 i.name as name,
-                Sum(ria.count) as count,
+                Sum(ria.count) as "count: _",
                 ria.unit as unit
             FROM ingredients AS i
                 JOIN recipe_ingredients_associations AS ria
@@ -71,16 +71,26 @@ async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Respon
     return HttpResponse::Ok().body(content);
 }
 
+#[get("/recipe/create/")]
+async fn recipe_create() -> impl Responder {
+    let context = Context::new();
+    let content = TEMPLATES
+        .render("meals/recipe_create.html", &context)
+        .unwrap();
+    return HttpResponse::Ok().body(content);
+}
+
 #[post("/recipe/delete/{id}")]
 async fn recipe_delete(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
     let id: u32 = req.match_info().get("id").unwrap().parse().unwrap();
     let p = state.pool.clone();
 
-    let deleted = sqlx::query!(r#"DELETE FROM recipes WHERE id = ?"#, id)
+    let _deleted = sqlx::query!(r#"DELETE FROM recipes WHERE id = ?"#, id)
         .fetch_all(&p)
         .await
         .unwrap();
 
+    // TODO: Fix this redirect. For some reason the HTML renders raw after the redirect? I don't
     return Redirect::to("/meals");
 }
 

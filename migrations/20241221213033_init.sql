@@ -7,7 +7,8 @@ CREATE TABLE recipes (
 
 CREATE TABLE ingredients (
     id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    UNIQUE (name)
 );
 
 CREATE TABLE recipe_ingredients_associations (

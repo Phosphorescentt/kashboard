@@ -19,7 +19,7 @@ pub struct Ingredient {
 pub struct IngredientWithCountUnit {
     pub id: i64,
     pub name: String,
-    pub count: i64,
+    pub count: Option<i64>,
     pub unit: String,
 }
 
