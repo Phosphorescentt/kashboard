@@ -43,7 +43,7 @@
 </div>
 
 <hr>
-<button id="get_shopping_list_button" hx-post="/meals/create-shopping-list" hx-target="#shopping-list">Generate Shopping List!</button>
+<button id="get_shopping_list_button" hx-post="/recipes/create-shopping-list" hx-target="#shopping-list">Generate Shopping List!</button>
 <div id="shopping-list"></div>
 
 <script>
@@ -63,7 +63,7 @@ function drop(ev) {
 }
 
 document.body.addEventListener("htmx:configRequest", function (evt) {
-  if (evt.detail.path == "/meals/create-shopping-list") {
+  if (evt.detail.path == "/recipes/create-shopping-list") {
     recipes_collection = document.getElementsByClassName("recipe");
     recipes = [].slice.call(recipes_collection)
     selected_recipe_ids = [];

@@ -1,1 +1,38 @@
-{% extends "main.html" %} {% block content %} test {% endblock content %}
+{% extends "main.html" %} {% block content %} <h1>Create a new recipe</h1> 
+<form action="create" method="post">
+  Name<input type="text"></input>
+  Time (minutes)<input type="text"></input>
+  Instructions<input type"text"></input>
+  <br>
+  <table id="ingredients-table">
+    <tr>
+      <th>Ingredient</th>
+      <th>Count</th>
+      <th>Unit</th>
+    </tr>
+  </table>
+  <button type="button" onclick="addIngredientsRow()">Add Ingredient</button>
+  <hr>
+  <button type="submit">Create!</button>
+</form>
+
+<script>
+
+function addIngredientsRow() {
+  rows = document.getElementById("ingredients-table");
+  var newElement = document.createElement("tr");
+  var row1 = "<th><input></input></th>";
+  var row2 = "<th><input></input></th>";
+  var row3 = "<th><input></input></th>";
+  var row4 = "<th><button type='button' onclick='deleteRow(this)'>X</button><th>"
+
+  newElement.innerHTML = row1.concat(row2, row3, row4);
+  rows.appendChild(newElement);
+}
+
+function deleteRow(e) {
+  e.parentElement.parentElement.remove()
+}
+
+</script>
+{% endblock content %}

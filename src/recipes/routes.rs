@@ -29,11 +29,11 @@ async fn recipes_list(state: web::Data<AppState>) -> impl Responder {
 
     let mut context = Context::new();
     context.insert("recipes", &recipes);
-    let content = TEMPLATES.render("meals/list.html", &context).unwrap();
+    let content = TEMPLATES.render("recipes/list.html", &context).unwrap();
     return HttpResponse::Ok().body(content);
 }
 
-#[get("/recipe/{id}/")]
+#[get("/recipe/{id}")]
 async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
     let id: u32 = req.match_info().get("id").unwrap().parse().unwrap();
     let p = state.pool.clone();
@@ -67,17 +67,22 @@ async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Respon
     context.insert("recipe", &recipe);
     context.insert("ingredients", &ingredients);
 
-    let content = TEMPLATES.render("meals/recipe.html", &context).unwrap();
+    let content = TEMPLATES.render("recipes/recipe.html", &context).unwrap();
     return HttpResponse::Ok().body(content);
 }
 
-#[get("/recipe/create/")]
-async fn recipe_create() -> impl Responder {
+#[get("/create")]
+async fn create() -> impl Responder {
     let context = Context::new();
     let content = TEMPLATES
-        .render("meals/recipe_create.html", &context)
+        .render("recipes/recipe_create.html", &context)
         .unwrap();
     return HttpResponse::Ok().body(content);
+}
+
+#[post("/create")]
+async fn create_db_records() -> impl Responder {
+    return HttpResponse::Ok().body("test");
 }
 
 #[post("/recipe/delete/{id}")]
@@ -91,7 +96,7 @@ async fn recipe_delete(req: HttpRequest, state: web::Data<AppState>) -> impl Res
         .unwrap();
 
     // TODO: Fix this redirect. For some reason the HTML renders raw after the redirect? I don't
-    return Redirect::to("/meals");
+    return Redirect::to("/recipes");
 }
 
 #[get("/plan")]
@@ -106,7 +111,7 @@ async fn plan(state: web::Data<AppState>) -> impl Responder {
     let mut context = Context::new();
     context.insert("recipes", &recipes);
 
-    let content = TEMPLATES.render("meals/plan.html", &context).unwrap();
+    let content = TEMPLATES.render("recipes/plan.html", &context).unwrap();
     return HttpResponse::Ok().body(content);
 }
 
@@ -136,7 +141,7 @@ fn validate_ids_string(s: String) -> Option<Vec<i64>> {
 }
 
 #[post("/create-shopping-list")]
-async fn persist_plan(
+async fn create_shopping_list(
     form: web::Form<ShoppingListRequest>,
     state: web::Data<AppState>,
 ) -> impl Responder {
@@ -175,7 +180,7 @@ async fn persist_plan(
         context.insert("ingredients", &ingredients);
 
         let content = TEMPLATES
-            .render("meals/shopping_list.html", &context)
+            .render("recipes/shopping_list.html", &context)
             .unwrap();
         return HttpResponse::Ok().body(content);
     } else {
