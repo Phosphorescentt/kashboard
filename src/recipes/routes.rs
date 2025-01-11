@@ -1,10 +1,11 @@
 use actix_web::{
-    get, post,
+    get, post, route,
     web::{self, Redirect},
     HttpRequest, HttpResponse, Responder,
 };
 use log::info;
 use serde::Deserialize;
+use std::collections::HashMap;
 use tera::Context;
 
 use crate::{AppState, TEMPLATES};
@@ -33,7 +34,7 @@ struct IngredientsCounts {
 
 // Views
 
-#[get("")]
+#[route("", method = "GET", method = "POST")]
 async fn recipes_list(state: web::Data<AppState>) -> impl Responder {
     let p = state.pool.clone();
 
@@ -48,7 +49,7 @@ async fn recipes_list(state: web::Data<AppState>) -> impl Responder {
     return HttpResponse::Ok().body(content);
 }
 
-#[get("/recipe/{id}")]
+#[route("/recipe/{id}", method = "GET", method = "POST")]
 async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
     let id: u32 = req.match_info().get("id").unwrap().parse().unwrap();
     let p = state.pool.clone();
@@ -100,13 +101,66 @@ async fn create_db_records(
     form: web::Json<CreateRecipeFormData>,
     state: web::Data<AppState>,
 ) -> impl Responder {
+    let p = state.pool.clone();
     // parse ingredients
     let ingredients = serde_json::from_str::<Vec<IngredientsCounts>>(&form.ingredients).unwrap();
-    // upsert ingredients
-    // create recipe
-    // insert recipe_ingredients_associations records
 
-    return HttpResponse::Ok().body("test");
+    // create recipe
+    let recipe_id = sqlx::query!(
+        r#"INSERT INTO recipes (name, time_minutes, instructions) VALUES (?, ?, ?) RETURNING id"#,
+        form.recipe_name,
+        form.recipe_time_minutes,
+        form.recipe_instructions
+    )
+    .fetch_one(&p)
+    .await
+    .unwrap()
+    .id;
+
+    // upsert ingredients and create associations
+    for ingredient in ingredients {
+        let id_row_result = sqlx::query!(
+            r#"SELECT id FROM ingredients WHERE name LIKE ?"#,
+            ingredient.name,
+        )
+        .fetch_one(&p)
+        .await;
+
+        let ingredient_id: i64;
+        match id_row_result {
+            Ok(id_row) => {
+                // If there's already something in the DB, use that ID
+                ingredient_id = id_row.id;
+            }
+            Err(_) => {
+                // Otherwise create a new one.
+                let new_record = sqlx::query!(
+                    r#"INSERT INTO ingredients (name) VALUES (?) RETURNING id"#,
+                    ingredient.name
+                )
+                .fetch_one(&p)
+                .await
+                .unwrap();
+
+                ingredient_id = new_record.id;
+            }
+        }
+
+        sqlx::query!(
+            r#"INSERT INTO recipe_ingredients_associations (recipe_id, ingredient_id, count, unit) VALUES (?, ?, ?, ?)"#,
+            recipe_id,
+            ingredient_id,
+            ingredient.count,
+            ingredient.unit,
+        ).fetch_all(&p).await.unwrap();
+    }
+
+    let response = HttpResponse::Ok()
+        .insert_header(("HX-Redirect", format!("/recipes/recipe/{}", recipe_id)))
+        .body("None");
+
+    return response;
+    // return Redirect::to(format!("/recipes/recipe/{}", recipe_id));
 }
 
 #[post("/recipe/delete/{id}")]
@@ -119,7 +173,7 @@ async fn recipe_delete(req: HttpRequest, state: web::Data<AppState>) -> impl Res
         .await
         .unwrap();
 
-    // TODO: Fix this redirect. For some reason the HTML renders raw after the redirect? I don't
+    // TODO: Fix this redirect. For some reason the HTML renders raw after the redirect?
     return Redirect::to("/recipes");
 }
 

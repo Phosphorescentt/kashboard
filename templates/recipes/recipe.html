@@ -9,7 +9,7 @@
 <li>{{ ingredient.name }} - {{ ingredient.count }}{% if ingredient.unit != "count" %} {{ ingredient.unit }}{% endif %}</li>
 {% endfor %}
 
-<form action="/meals/recipe/delete/{{ recipe.id }}" method="post">
+<form action="/recipes/recipe/delete/{{ recipe.id }}" method="post">
 <button class="pico-color-red-500">Delete</button>
 </form>
 
