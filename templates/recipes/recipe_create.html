@@ -1,8 +1,8 @@
 {% extends "main.html" %} {% block content %} <h1>Create a new recipe</h1> 
-<form action="create" method="post">
-  Name<input type="text"></input>
-  Time (minutes)<input type="text"></input>
-  Instructions<input type"text"></input>
+<form>
+  Name<input name="recipe_name" type="text"></input>
+  Time (minutes)<input name="recipe_time_minutes" type="number"></input>
+  Instructions<input name="recipe_instructions" type="text"></input>
   <br>
   <table id="ingredients-table">
     <tr>
@@ -13,17 +13,18 @@
   </table>
   <button type="button" onclick="addIngredientsRow()">Add Ingredient</button>
   <hr>
-  <button type="submit">Create!</button>
+  {# <button type="button" onclick="sendCreateRecipeData()">Create!</button> #}
+  <button type="button" hx-post="create" hx-ext="json-enc">Create!</button>
 </form>
-
 <script>
 
 function addIngredientsRow() {
   rows = document.getElementById("ingredients-table");
   var newElement = document.createElement("tr");
-  var row1 = "<th><input></input></th>";
-  var row2 = "<th><input></input></th>";
-  var row3 = "<th><input></input></th>";
+  newElement.classList.add("ingredient_row")
+  var row1 = "<th><input class='ingredient_name' type='text'></input></th>";
+  var row2 = "<th><input class='ingredient_count' type='number'></input></th>";
+  var row3 = "<th><input class='ingredient_unit' type='text'></input></th>";
   var row4 = "<th><button type='button' onclick='deleteRow(this)'>X</button><th>"
 
   newElement.innerHTML = row1.concat(row2, row3, row4);
@@ -33,6 +34,23 @@ function addIngredientsRow() {
 function deleteRow(e) {
   e.parentElement.parentElement.remove()
 }
+
+document.body.addEventListener("htmx:configRequest", function (evt) {
+  if (evt.detail.path == "create") {
+
+    ingredients_collection = document.getElementsByClassName("ingredient_row");
+    ingredients = [].slice.call(ingredients_collection)
+    ingredients_json = []
+    ingredients.forEach(element => {
+      name = element.getElementsByClassName("ingredient_name")[0].value
+      count = parseInt(element.getElementsByClassName("ingredient_count")[0].value, 10)
+      unit = element.getElementsByClassName("ingredient_unit")[0].value
+
+      ingredients_json.push({ name: name, count: count, unit: unit });
+    })
+    evt.detail.parameters["ingredients"] = JSON.stringify(ingredients_json);
+  }
+});
 
 </script>
 {% endblock content %}

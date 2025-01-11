@@ -43,7 +43,7 @@
 </div>
 
 <hr>
-<button id="get_shopping_list_button" hx-post="/recipes/create-shopping-list" hx-target="#shopping-list">Generate Shopping List!</button>
+<button id="get_shopping_list_button" hx-post="/recipes/create-shopping-list" hx-target="#shopping-list" hx-vals='{"json": [{"test": 1}, {"test": 2}]}'>Generate Shopping List!</button>
 <div id="shopping-list"></div>
 
 <script>
@@ -75,7 +75,6 @@ document.body.addEventListener("htmx:configRequest", function (evt) {
       }
     })
     evt.detail.parameters["recipe_ids"] = selected_recipe_ids.join(",");
-    console.log(evt.detail.parameters);
   }
 });
 </script>

@@ -16,6 +16,21 @@ struct ShoppingListRequest {
     recipe_ids: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct CreateRecipeFormData {
+    recipe_name: String,
+    recipe_time_minutes: String,
+    recipe_instructions: String,
+    ingredients: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct IngredientsCounts {
+    name: String,
+    count: i64,
+    unit: String,
+}
+
 // Views
 
 #[get("")]
@@ -81,7 +96,16 @@ async fn create() -> impl Responder {
 }
 
 #[post("/create")]
-async fn create_db_records() -> impl Responder {
+async fn create_db_records(
+    form: web::Json<CreateRecipeFormData>,
+    state: web::Data<AppState>,
+) -> impl Responder {
+    // parse ingredients
+    let ingredients = serde_json::from_str::<Vec<IngredientsCounts>>(&form.ingredients).unwrap();
+    // upsert ingredients
+    // create recipe
+    // insert recipe_ingredients_associations records
+
     return HttpResponse::Ok().body("test");
 }
 
