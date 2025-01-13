@@ -47,19 +47,38 @@
 <div id="shopping-list"></div>
 
 <script>
+function deleteRecipe(ev) {
+  ev.parentElement.parentElement.remove()
+}
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
 
 function drag(ev) {
   ev.dataTransfer.setData("text", ev.target.id);
+  ev.dataTransfer.setData("originalParentId", ev.target.parentElement.id);
 }
 
 function drop(ev) {
+  console.log(ev.dataTransfer);
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
   parent = ev.target.closest(".recipe-holder");
-  parent.appendChild(document.getElementById(data));
+  droppedElement = document.getElementById(data);
+
+  if (droppedElement.getElementsByClassName("delete-button").length == 0) {
+    deleteButton = document.createElement("button");
+    deleteButton.innerHTML = "Delete";
+    deleteButton.setAttribute("onclick", "deleteRecipe(this)");
+    deleteButton.setAttribute("class", "delete-button");
+  }
+
+  parent.appendChild(droppedElement);
+
+  console.log(droppedElement);
+  article = droppedElement.querySelector("article");
+  article.appendChild(deleteButton);
 }
 
 document.body.addEventListener("htmx:configRequest", function (evt) {
