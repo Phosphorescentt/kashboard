@@ -4,7 +4,7 @@
 <h2>Recipes</h2>
 {% for recipe in recipes %}
 
-<div id="{{ recipe.id }}" class="recipe" style="display: inline-block;" draggable="true" ondragstart="drag(event)">
+<div class="{{ recipe.id }} recipe" style="display: inline-block;" draggable="true" ondragstart="drag(event)">
     <article>
       <h3>{{ recipe.name }}</h3>
       <h6>{{ recipe.time_minutes }}m</h6>
@@ -56,28 +56,36 @@ function allowDrop(ev) {
 }
 
 function drag(ev) {
-  ev.dataTransfer.setData("text", ev.target.id);
+  ev.dataTransfer.setData("text", ev.target.className);
   ev.dataTransfer.setData("originalParentId", ev.target.parentElement.id);
 }
 
 function drop(ev) {
-  console.log(ev.dataTransfer);
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
   parent = ev.target.closest(".recipe-holder");
-  droppedElement = document.getElementById(data);
+  droppedElements = document.getElementsByClassName(data);
+  for (let element of droppedElements) {
+    if (element.parentElement.id == ev.dataTransfer.getData("originalParentId")) {
+      realDroppedElement = element;
+    }
+  }
 
-  if (droppedElement.getElementsByClassName("delete-button").length == 0) {
+  if (ev.dataTransfer.getData("originalParentId") == "not-selected") {
+    notSelectedArticle = document.getElementById("not-selected");
+    notSelectedArticle.appendChild(realDroppedElement.cloneNode(true));
+  }
+
+  if (realDroppedElement.getElementsByClassName("delete-button").length == 0) {
     deleteButton = document.createElement("button");
     deleteButton.innerHTML = "Delete";
     deleteButton.setAttribute("onclick", "deleteRecipe(this)");
     deleteButton.setAttribute("class", "delete-button");
   }
 
-  parent.appendChild(droppedElement);
+  parent.appendChild(realDroppedElement);
 
-  console.log(droppedElement);
-  article = droppedElement.querySelector("article");
+  article = realDroppedElement.querySelector("article");
   article.appendChild(deleteButton);
 }
 
@@ -90,7 +98,8 @@ document.body.addEventListener("htmx:configRequest", function (evt) {
       parent_recipe_holder = element.parentElement;
       // Pick up only the recipes that have been moved from the not-selected box.
       if (parent_recipe_holder.id != "not-selected") {
-        selected_recipe_ids.push(parseInt(element.id, 10))
+        console.log(element.className);
+        selected_recipe_ids.push(parseInt(element.className, 10))
       }
     })
     evt.detail.parameters["recipe_ids"] = selected_recipe_ids.join(",");

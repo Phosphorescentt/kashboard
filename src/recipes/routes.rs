@@ -3,7 +3,7 @@ use actix_web::{
     web::{self, Redirect},
     HttpRequest, HttpResponse, Responder,
 };
-use log::info;
+use log::{debug, info};
 use serde::Deserialize;
 use std::collections::HashMap;
 use tera::Context;
@@ -59,7 +59,7 @@ async fn recipe_get(req: HttpRequest, state: web::Data<AppState>) -> impl Respon
         .await
         .unwrap();
 
-    let ingredients: Vec<model::IngredientWithCountUnit> = sqlx::query_as!(
+    let ingredients = sqlx::query_as!(
         model::IngredientWithCountUnit,
         r#"
             SELECT i.id as id,
@@ -229,30 +229,72 @@ async fn create_shopping_list(
     let is_valid = validate_ids_string(form.recipe_ids.clone());
     // This is almost definitely
     if let Some(ids) = is_valid {
-        let ingredients = sqlx::query_as::<_, model::IngredientWithCountUnit>(
-            format!(
-                r#"
-            SELECT i.id as id,
-                i.name as name,
-                Sum(ria.count) as count,
-                ria.unit as unit
-            FROM ingredients AS i
+        info!("recipe_ids: {}", form.recipe_ids.clone());
+        let mut ingredients_store: HashMap<(i64, String, String), i64> = HashMap::new();
+
+        for id in ids.iter() {
+            // do stuff
+            let ingredients = sqlx::query_as!(
+                model::IngredientWithCountUnit,
+                r#"SELECT 
+                    i.id AS id,
+                    i.name AS name,
+                    ria.count as count,
+                    ria.unit as unit
+                FROM ingredients AS i
                 JOIN recipe_ingredients_associations AS ria
                     ON i.id = ria.ingredient_id
-            WHERE ria.recipe_id in ({}) 
-            GROUP BY ria.ingredient_id,
-                    ria.unit
-            "#,
-                ids.iter()
-                    .map(|e| e.to_string())
-                    .collect::<Vec<String>>()
-                    .join(",")
+                WHERE ria.recipe_id = ?"#,
+                id,
             )
-            .as_str(),
-        )
-        .fetch_all(&p)
-        .await
-        .unwrap();
+            .fetch_all(&p)
+            .await
+            .unwrap();
+
+            for ingredient in ingredients.iter() {
+                if let Some(current_count) = ingredients_store.get(&(
+                    ingredient.id,
+                    ingredient.name.clone(),
+                    ingredient.unit.clone(),
+                )) {
+                    ingredients_store.insert(
+                        (
+                            ingredient.id,
+                            ingredient.name.clone(),
+                            ingredient.unit.clone(),
+                        ),
+                        current_count + ingredient.count.unwrap(),
+                    );
+                } else {
+                    ingredients_store.insert(
+                        (
+                            ingredient.id,
+                            ingredient.name.clone(),
+                            ingredient.unit.clone(),
+                        ),
+                        ingredient.count.unwrap(),
+                    );
+                }
+            }
+        }
+
+        debug!("{:?}", ingredients_store);
+
+        for k in ingredients_store.keys() {
+            let v = ingredients_store.get(k).unwrap();
+        }
+        let ingredients = ingredients_store
+            .keys()
+            .map(|k| {
+                let v = ingredients_store.get(k).unwrap();
+                return model::IngredientWithCountUnit {
+                    id: k.0,
+                    name: k.1.clone(),
+                    count: Some(*v),
+                    unit: k.2.clone(),
+                };
+            })
+            .collect::<Vec<model::IngredientWithCountUnit>>();
 
         let mut context = Context::new();
         context.insert("ingredients", &ingredients);
